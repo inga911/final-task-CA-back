@@ -1,43 +1,79 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const mainRouter = require('./routers/mainRouter');
 const app = express();
 const http = require('http');
 const socketio = require('socket.io');
 require('dotenv').config();
-const path = require('path');
+const { handleMessageSend } = require('./controllers/messageController');
+const bodyParser = require('body-parser');
 
-// Middleware
-app.use(cors());
+// Middleware for CORS
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+}));
+
+// Body parsers
 app.use(express.json());
+app.use(bodyParser.json());
 
-
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_KEY)
     .then(() => {
         console.log("DB CONNECT SUCCESS");
-    }).catch(err => {
-        console.log('error');
-        console.log(err);
     })
+    .catch(err => {
+        console.error('DB connection error:', err);
+    });
 
-app.use('/', mainRouter)
-
-
-
-
-const PORT = 1000;
+// Set up the server and Socket.IO
+const PORT = process.env.PORT || 1000;
 const server = http.createServer(app);
 const io = socketio(server, {
     cors: {
-        origin: "http://localhost:1000",
+        origin: "http://localhost:5173",
         credentials: true,
     }
-})
-
-io.on('connection', (socket) => {
-    console.log('New WebSocket Connection');
 });
+
+app.set('io', io);
+
+io.on("connection", (socket) => {
+    console.log("A user connected");
+
+    socket.on("joinRoom", (room) => {
+        socket.join(room);
+        console.log(`User joined room: ${room}`);
+    });
+
+    socket.on("leaveRoom", (room) => {
+        socket.leave(room);
+        console.log(`User left room: ${room}`);
+    });
+
+    socket.on('sendMessage', (messageData) => {
+        const { sender, receiver, message } = messageData;
+
+        if (!sender || !receiver || !message) {
+            console.error('Incomplete message data:', messageData);
+            return;
+        }
+
+        const room = [sender, receiver].sort().join("_");
+        io.to(room).emit("newMessage", messageData);
+    });
+
+    socket.on("disconnect", () => {
+        console.log("A user disconnected");
+    });
+});
+
+
+const mainRouter = require('./routers/mainRouter')(io);
+app.use('/', mainRouter);
+
+// Start the server
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

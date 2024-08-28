@@ -18,8 +18,11 @@ const messageSchema = new Schema({
         type: Date,
         default: Date.now,
     },
-
-});
+    liked: {
+        type: Boolean,
+        default: false
+    }
+}, { collection: 'messages' });
 
 const messageDB = mongoose.model('message', messageSchema);
 
