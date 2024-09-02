@@ -11,7 +11,9 @@ const {
     updatePassword,
     sendMessage,
     getMessages,
-    likeMessage
+    // likeMessage,
+    getActiveChats,
+    deleteConversation
 } = require('../controllers/mainController');
 
 const {
@@ -36,7 +38,9 @@ module.exports = (io) => {
     Router.get("/getUser/:username", getUserValidation, getUser);
     Router.post("/sendMessage", authMiddle, sendMessageValidation, sendMessage)
     Router.get("/getMessages/:sender/:receiver", getMessages);
-    Router.post('/likeMessage/:messageId', likeMessage);
+    // Router.post('/likeMessage/:messageId', likeMessage);
+    Router.get('/activeChats/:userId', getActiveChats);
+    Router.delete('/deleteConversation/:userId1/:userId2', deleteConversation);
 
 
 

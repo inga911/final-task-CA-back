@@ -10,13 +10,13 @@ module.exports = {
         if (!password) {
             return res.send({ error: true, message: 'Passsword not exists', data: null });
         }
-        if (username.length < 3 || username.length > 20) {
+        if (username.length < 4 || username.length > 20) {
             console.log("Username validation failed");
-            return res.send({ error: true, message: 'Username should be between 3 and 20 characters long', data: null });
+            return res.send({ error: true, message: 'Username should be between 4 and 20 characters long', data: null });
         }
-        if (password.length < 5) {
+        if (password.length < 4 || password.length > 20) {
             console.log("Password length validation failed");
-            return res.send({ error: true, message: 'Password should be at least 5 characters long', data: null });
+            return res.send({ error: true, message: 'Password should be at least 4 and 20 characters long', data: null });
         }
         next()
     },
@@ -116,8 +116,8 @@ module.exports = {
 
     sendMessageValidation: (req, res, next) => {
         const { message } = req.body;
-        if (message.length < 3 || message.length > 100) {
-            return res.send({ error: true, message: 'Message should be between 3 and 100 characters long', data: null });
+        if (message.length < 1) {
+            return res.send({ error: true, message: 'Message is empty', data: null });
         }
         next();
     },

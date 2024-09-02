@@ -21,6 +21,15 @@ const messageSchema = new Schema({
     liked: {
         type: Boolean,
         default: false
+    },
+    likedBy: {
+        type: String,
+        default: null,
+    },
+    conversationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'conversation'
     }
 }, { collection: 'messages' });
 
